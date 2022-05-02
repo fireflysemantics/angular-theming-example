@@ -15,12 +15,8 @@ export class AppComponent implements OnInit {
   public toppings = new FormControl();
   toppingList: string[] = ['Extra cheese', 'Mushroom', 'Onion', 'Pepperoni', 'Sausage', 'Tomato'];
 
-  themeClass:string = ''
-  ngOnInit(): void {
-
-    // subscribe to some source of theme change events, then...
-    this.themeClass = 'my-theme';
-    
+  themeClass:string = 'my-theme'
+  ngOnInit(): void {    
     // remove old theme class and add new theme class
     // we're removing any css class that contains '-theme' string but your theme classes can follow any pattern
     const overlayContainerClasses = this.overlayContainer.getContainerElement().classList;
@@ -28,6 +24,9 @@ export class AppComponent implements OnInit {
     if (themeClassesToRemove.length) {
        overlayContainerClasses.remove(...themeClassesToRemove);
     }
-    overlayContainerClasses.add(this.themeClass);
+//    overlayContainerClasses.add(this.themeClass);
+    this.overlayContainer.getContainerElement().classList.add('my-theme')
+    console.log(this.overlayContainer.getContainerElement().classList)
   }
 }
+
