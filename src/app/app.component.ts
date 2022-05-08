@@ -10,47 +10,82 @@ import { StateService } from './services/state.service';
 })
 export class AppComponent implements OnInit {
 
-  public themeSelect = new FormControl();
+  //========================================
+  // The theme selection control
+  // initialized with a snapshot
+  // of the initial theme value
+  // from the Object Store. 
+  //========================================
+  public themeSelect = new FormControl(this.s.OS.snapshot(this.s.OS.S.theme));
+
+  //========================================
+  // Array to populate the mat-select
+  // for theme selection
+  //========================================
   themes: string[] = ['Light', 'Dark'];
-  themeClass:string = 'light-theme'
-  themeMap:Map<string,String> = new Map()
+
+  //========================================
+  // Map Light to light-theme and 
+  // Dark to dark-theme
+  //========================================
+  themeMap: Map<string, string> = new Map()
 
   constructor(
-    public s:StateService,
+    public s: StateService,
     private overlayContainer: OverlayContainer
   ) {
+    //========================================
+    // Map Light to light-theme and 
+    // Dark to dark-theme
+    //========================================
     this.themeMap.set('Light', 'light-theme')
     this.themeMap.set('Dark', 'dark-theme')
   }
 
   ngOnInit(): void {
-    this.themeSelect.valueChanges.subscribe(theme=>{
-      this.s.OS.put(this.s.OS.S.theme, this.themeMap.get(theme))
+    //========================================
+    // Subscribe to the themeSelect control.
+    // When the user selects a new theme
+    // the control emmits the theme.
+    // We put the new theme value in the object
+    // store, and the object store theme 
+    // observable is then used by the app.component.html
+    // template to switch the theme.
+    //========================================
+    this.themeSelect.valueChanges.subscribe(themeColor => {
+      const theme:string | undefined = this.themeMap.get(themeColor)
+      this.s.OS.put(this.s.OS.S.theme, theme)
+      this.removeThemeClasses()
+      this.addThemeClass()
     })
+    //========================================
+    // Remove any current theme classes from
+    // overlay container.  Then add the default
+    // theme class.
+    //========================================
     this.removeThemeClasses()
     this.addThemeClass()
-    this.s.OS.S.theme.obs.subscribe(t=>console.log(t))
   }
-
 
   /**
    * Remove css classes that contain the classPostfix
    * string from the CDK overlayContainer.
    */
-  removeThemeClasses(classPostfix:string = '-theme') {
+  removeThemeClasses(classPostfix: string = '-theme') {
     const overlayContainerClasses = this.overlayContainer.getContainerElement().classList;
     const themeClassesToRemove = Array.from(overlayContainerClasses).filter((item: string) => item.includes(classPostfix));
     if (themeClassesToRemove.length) {
-       overlayContainerClasses.remove(...themeClassesToRemove);
-    }    
+      overlayContainerClasses.remove(...themeClassesToRemove);
+    }
   }
 
   /**
    * Add the themeClass to the overlay container class list.
-   * @param themeClass The theme class to add
+   * The current theme class is retrieved from the state service
+   * Object Store.
    */
-  addThemeClass(themeClass:string = 'light-theme') {
+  addThemeClass() {
+    const themeClass:string = this.s.OS.snapshot(this.s.OS.S.theme)
     this.overlayContainer.getContainerElement().classList.add(themeClass)
   }
-
 }
